@@ -1,1 +1,27 @@
 @import "tailwindcss";
+@plugin "flowbite-react/plugin/tailwindcss";
+@source "../.flowbite-react/class-list.json";
+
+ .ju367v78 {
+    color: #1A1A1A !important;
+    background: #F5F57A !important;
+}
+
+@theme {
+  --font-display: "Oswald", "sans-serif"; 
+}
+
+/*
+.ju367v76 {
+    color: #ffffff !important;
+    background: #1A1A1A!important;
+}
+
+.iekbcc {
+    color: #ffffff !important;
+    background: #1A1A1A!important;
+}
+
+.ju367v7q {
+    border: none !important;
+} */

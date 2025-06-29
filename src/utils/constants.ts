@@ -33,3 +33,19 @@ export const testnet = {
     provider: "",
   },
 };
+
+export const minMax = {
+        eth: {
+            min: '0.1',
+            max: '32'
+        },
+        bnb: {
+            min: '1',
+            max: '10000',
+        },
+        s: {
+            min: '300',
+            max: '500000'
+        }
+
+    }

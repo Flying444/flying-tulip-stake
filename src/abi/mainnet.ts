@@ -1,5 +1,5 @@
-[
-  {
+export const MainnetABI = {
+  abi: [{
     "inputs": [
       { "internalType": "address", "name": "_coldStorage", "type": "address" }
     ],
@@ -368,4 +368,4 @@
     "stateMutability": "payable",
     "type": "function"
   }
-]
+]} as const
