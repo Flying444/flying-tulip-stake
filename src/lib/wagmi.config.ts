@@ -4,7 +4,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { mainnet, bsc, sonic } from 'wagmi/chains'
 
-const projectId = import.meta.env.VITE_PROJECT_ID //'3c96f3b35cd54269e006ef63e1c22c38'
+const projectId = import.meta.env.VITE_PROJECT_ID
 const apiKey = import.meta.env.VITE_API_KEY
 export const config = getDefaultConfig({
   appName: 'flyingtulip',
