@@ -1,3 +1,3 @@
-const sendEmail = async () => {
+export const sendEmail = async () => {
     //TODO NOT RECOMENDED FROM FRONTEND
 }

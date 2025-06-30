@@ -21,16 +21,16 @@ export const Deposit = () => {
     const [projection, setProjection] = useState(0.0)
     const [sym, setSym] = useState('ETH')
 
-    const {totalStakers, isPending} = useGetStakers()
-    const {totalStaked} = useGetStaked()
-    const {totalReward, error} = useGetRewards()
+    const { totalStakers, isPending } = useGetStakers()
+    const { totalStaked } = useGetStaked()
+    const { totalReward, error } = useGetRewards()
     console.log(error)
-    const [amounts, setAmounts ] = useState({
+    const [amounts, setAmounts] = useState({
         stakers: totalStakers,
         staked: totalStaked,
         reward: totalReward
     })
- 
+
     useEffect(() => {
         switch (chainId) {
             case 1:
@@ -49,10 +49,10 @@ export const Deposit = () => {
         setCalc(0.00)
         setProjection(0)
         setAmounts({
-        stakers: totalStakers,
-        staked: totalStaked,
-        reward: totalReward
-    })
+            stakers: totalStakers,
+            staked: totalStaked,
+            reward: totalReward
+        })
     }, [chainId])
 
 
@@ -70,17 +70,17 @@ export const Deposit = () => {
 
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LuUsers size={20} />
-                   { isPending ? (<Spinner />) : ( <p>{amounts.stakers}</p>)}
+                    {isPending ? (<Spinner />) : (<p>{amounts.stakers}</p>)}
                     <p>Total Stakers</p>
                 </div>
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LiaMoneyBillWaveSolid size={20} />
-                     { isPending ? (<Spinner />) : (<p>{amounts.staked}</p>)}
+                    {isPending ? (<Spinner />) : (<p>{amounts.staked}</p>)}
                     <p>Total Staked</p>
                 </div>
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LiaTrophySolid size={20} />
-                     { isPending ? (<Spinner />) : (<p>{amounts.reward}</p>)}
+                    {isPending ? (<Spinner />) : (<p>{amounts.reward}</p>)}
                     <p>Rewards paid</p>
                 </div>
 
@@ -96,7 +96,7 @@ export const Deposit = () => {
                     <div className="flex w-full space-x-2 justify-center items-center">
                         {chainId === 56 ? (<SiBinance size={30} />) : (<FaEthereum size={30} />)}
                         {projection}
-                        <p> {' ' } {sym}</p>
+                        <p> {' '} {sym}</p>
                     </div>
                 </div>
             </div>

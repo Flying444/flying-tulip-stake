@@ -6,6 +6,7 @@ import { mainnet, bsc, sonic } from 'wagmi/chains'
 
 const projectId = import.meta.env.VITE_PROJECT_ID
 const apiKey = import.meta.env.VITE_API_KEY
+
 export const config = getDefaultConfig({
   appName: 'flyingtulip',
   projectId: projectId,
