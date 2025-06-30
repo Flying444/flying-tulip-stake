@@ -6,16 +6,15 @@ import { useAccount } from "wagmi";
 import { CiInboxIn } from "react-icons/ci";
 import { PiHandDeposit  } from "react-icons/pi";
 import { GiTakeMyMoney } from "react-icons/gi";
-import { TCardComp } from "@/types"
 
 
-export const Navmenu = ({tvl}: TCardComp) => {
+export const Navmenu = () => {
     const {isConnected} = useAccount()
     return (
-        <div className="flex h-full items-center">
-        <Tabs aria-label="" className="text-white"  variant="underline" >
+        <div className="flex h-full justify-center w-full items-center">
+        <Tabs aria-label="" className="flex items-center"  variant="underline" >
             <TabItem active title="Stake" icon={GiTakeMyMoney} style={{ color: '#ffff', cursor: 'pointer' }}>
-                <TvlComp tvl={tvl} />
+                <TvlComp />
             </TabItem>
             <TabItem title="Deposit" icon={CiInboxIn} className="active:text-[#F5F57A] active:border-[#F5F57A] hover:cursor-pointer">
                 {isConnected && (<Deposit />)}

@@ -1,5 +1,7 @@
-export const MainnetABI = {
-  abi: [{
+export const MainnetABI = { 
+  address: '0x8ecEbc2BF559D96c663E6cCD80e2C78431E0d9E9', 
+  abi: [
+  {
     "inputs": [
       { "internalType": "address", "name": "_coldStorage", "type": "address" }
     ],

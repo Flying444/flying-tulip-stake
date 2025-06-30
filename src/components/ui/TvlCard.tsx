@@ -2,8 +2,9 @@ import { FaEthereum } from "react-icons/fa";
 import { SiBinance } from "react-icons/si";
 import {TCard} from '../../types'
 import { IconType } from 'react-icons/lib';
+import { Spinner } from "flowbite-react";
 
-export const TvlCard = ({ namePool, totalAmount}: TCard) => {
+export const TvlCard = ({ namePool, totalAmount, isLoading}: TCard) => {
 
   let Icon: IconType;
   let symbol: string;
@@ -28,7 +29,7 @@ export const TvlCard = ({ namePool, totalAmount}: TCard) => {
       <Icon size={40} />
       <p>{namePool}</p>
       <p>Total Locked Value</p>
-      <p>{symbol + ' '}{totalAmount}</p>
+      {isLoading ? (<Spinner />) : ( <p>{symbol + ' '}{totalAmount}</p>)}
     </div>
   );
 }

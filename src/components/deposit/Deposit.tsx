@@ -4,9 +4,13 @@ import { RangeSlider } from "flowbite-react";
 import { FaEthereum } from "react-icons/fa";
 import { SiBinance } from "react-icons/si";
 import { minMax } from "@/utils/constants";
+import { useGetStakers } from "@/hooks/useGetStakers";
+import { useGetStaked } from "@/hooks/useGetStaked";
+import { useGetRewards } from "@/hooks/useGetRewards";
 import { LuUsers } from "react-icons/lu";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia";
 import { LiaTrophySolid } from "react-icons/lia";
+import { Spinner } from "flowbite-react";
 
 export const Deposit = () => {
     const chainId = useChainId()
@@ -16,10 +20,15 @@ export const Deposit = () => {
     const [calc, setCalc] = useState(0.00)
     const [projection, setProjection] = useState(0.0)
     const [sym, setSym] = useState('ETH')
+
+    const {totalStakers, isPending} = useGetStakers()
+    const {totalStaked} = useGetStaked()
+    const {totalReward, error} = useGetRewards()
+    console.log(error)
     const [amounts, setAmounts ] = useState({
-        stakers: 100,
-        staked: 400,
-        reward: 58
+        stakers: totalStakers,
+        staked: totalStaked,
+        reward: totalReward
     })
  
     useEffect(() => {
@@ -40,9 +49,9 @@ export const Deposit = () => {
         setCalc(0.00)
         setProjection(0)
         setAmounts({
-        stakers: 100,
-        staked: 400,
-        reward: 58
+        stakers: totalStakers,
+        staked: totalStaked,
+        reward: totalReward
     })
     }, [chainId])
 
@@ -61,17 +70,17 @@ export const Deposit = () => {
 
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LuUsers size={20} />
-                    <p>{amounts.stakers}</p>
+                   { isPending ? (<Spinner />) : ( <p>{amounts.stakers}</p>)}
                     <p>Total Stakers</p>
                 </div>
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LiaMoneyBillWaveSolid size={20} />
-                    <p>{amounts.staked}</p>
+                     { isPending ? (<Spinner />) : (<p>{amounts.staked}</p>)}
                     <p>Total Staked</p>
                 </div>
                 <div className="flex flex-col bg-[#222222] w-auto space-y-2 justify-center items-center rounded-xl p-5">
                     < LiaTrophySolid size={20} />
-                    <p>{amounts.reward}</p>
+                     { isPending ? (<Spinner />) : (<p>{amounts.reward}</p>)}
                     <p>Rewards paid</p>
                 </div>
 
@@ -107,7 +116,7 @@ export const Deposit = () => {
 
                     </div>
                 </div>
-                <RangeSlider id="valueAmount" className="text-[#F5F57A] ring-[#F5F57A] " min={range.min} max={range.max} value={valueRange} sizing="md" onChange={() => handleOnChange} />
+                <RangeSlider id={valueRange} className="text-[#F5F57A] ring-[#F5F57A] " min={range.min} max={range.max} value={valueRange} sizing="md" onChange={() => handleOnChange} />
             </div>
             <div className="flex flex-row font-bold text-sm w-full">
                 <div className="w-1/2 text-left">

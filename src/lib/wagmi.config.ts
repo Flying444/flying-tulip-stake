@@ -1,24 +1,19 @@
-import { http } from 'viem'
+import { http } from 'wagmi'
 import {
   getDefaultConfig
 } from '@rainbow-me/rainbowkit';
 import { mainnet, bsc, sonic } from 'wagmi/chains'
 
-declare module 'wagmi' {
-  interface Register {
-    config: typeof config
-  }
-}
-
-const projectId = '3c96f3b35cd54269e006ef63e1c22c38'  //import.meta.env.PROJECT_ID
-
+const projectId = import.meta.env.VITE_PROJECT_ID //'3c96f3b35cd54269e006ef63e1c22c38'
+const apiKey = import.meta.env.VITE_API_KEY
 export const config = getDefaultConfig({
   appName: 'flyingtulip',
   projectId: projectId,
   chains: [mainnet, bsc, sonic],
   transports: {
-    [mainnet.id]: http(),
-    [bsc.id]: http(),
-    [sonic.id] : http(),
+    [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${apiKey}`),
+    [bsc.id]: http(`https://opbnb-mainnet.g.alchemy.com/v2/${apiKey}`),
+    [sonic.id] : http(`https://sonic-mainnet.g.alchemy.com/v2/${apiKey}`),
   },
+  ssr: true
 })
