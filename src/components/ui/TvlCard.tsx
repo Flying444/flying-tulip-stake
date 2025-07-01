@@ -1,35 +1,47 @@
-import { FaEthereum } from "react-icons/fa";
-import { SiBinance } from "react-icons/si";
-import {TCard} from '../../types'
-import { IconType } from 'react-icons/lib';
+import { TCard } from '../../types'
 import { Spinner } from "flowbite-react";
+import { EthIcon, BnbIcon, SonicIcon } from './Icons';
 
-export const TvlCard = ({ namePool, totalAmount, isLoading}: TCard) => {
+export const TvlCard = ({ namePool, totalAmount, isLoading }: TCard) => {
 
-  let Icon: IconType;
-  let symbol: string;
-  
+  let Icon = EthIcon
+  let symbol: string = 'eth'
+
   switch (namePool) {
     case "Sonic":
-      Icon = FaEthereum;
       symbol = 'S'
+      Icon = SonicIcon
       break;
-    case "BSC": 
-      Icon = SiBinance;
+    case "BSC":
       symbol = 'BNB'
+      Icon = BnbIcon
       break;
     default:
-      Icon = FaEthereum;
-      symbol='ETH'
+      symbol = 'ETH'
       break;
   }
 
   return (
-    <div className="flex flex-col w-auto items-center p-4 rounded-md bg-[#222222] space-y-2">
-      <Icon size={40} />
-      <p>{namePool}</p>
-      <p>Total Locked Value</p>
-      {isLoading ? (<Spinner />) : ( <p>{symbol + ' '}{totalAmount}</p>)}
+    <div className="flex flex-col w-72 md:w-96 h-auto justify-center items-center p-5 rounded-md bg-[#222222] space-y-2">
+      <div className='flex w-full flex-row'>
+        <div className='flex w-1/2 h-full p-5 items-center justify-start '>
+          <Icon />
+        </div>
+        <div className='flex w-1/2 flex-col space-y-3 justify-end items-center p-2'>
+          <p>{namePool}</p>
+          {isLoading ? (<Spinner />) : (<p className='text-sm' >{totalAmount}{' ' + symbol}</p>)}
+        </div>
+      </div>
+      <div className='flex flex-row w-full border-t-2 pt-2'>
+        <div className='flex w-1/2'>
+          <p className='text-xs'>Your Invested Amount</p>
+        </div>
+        <div className='flex w-1/2 space-x-2 justify-end'>
+          <p className='text-xs'>0</p>
+          <p className='text-xs'>{symbol}</p>
+        </div>
+
+      </div>
     </div>
   );
 }

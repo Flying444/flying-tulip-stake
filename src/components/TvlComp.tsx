@@ -23,7 +23,7 @@ export const TvlComp = () => {
     }, [chainId])
 
     return (
-        <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row w-full justify-center items-center md:space-x-6 p-4">
+        <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row w-full justify-center items-center  md:space-x-6 p-2 md:p-4">
             {
                 tvl.map((item, i) => (
                     <TvlCard key={i} namePool={item.namePool} totalAmount={item.totalAmount} isLoading={totalEth.isPending}/>

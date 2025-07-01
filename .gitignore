@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 .env
+.gitpod.yml
 
 # Editor directories and files
 .vscode/*

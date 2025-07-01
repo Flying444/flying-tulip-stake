@@ -17,9 +17,8 @@ export type TCardComp = {
 }
 
 export type TDeposit = {
-  asset: 'ETH' | 'BNB' | 'S';
-  contractAddress: `0x${string}`;
-  amount: bigint;
+  chainId: number;
+  amount: string;
 }
 
 export type TUserData = {
