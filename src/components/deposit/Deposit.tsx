@@ -23,11 +23,11 @@ export const Deposit = () => {
     const { totalStaked, isPending: isLoadingStaked } = useGetStaked()
     const { totalReward, isPending: isLoadingReward } = useGetRewards()
 
-    const [amounts, setAmounts] = useState({
+    const amounts= {
         stakers: totalStakers,
         staked: totalStaked,
         reward: totalReward
-    })
+    }
 
     useEffect(() => {
         let newMin: string | number = minMax.eth.min;

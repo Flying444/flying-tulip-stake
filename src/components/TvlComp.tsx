@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useChainId } from "wagmi";
 import { TvlCard } from "./ui/TvlCard"
-import { bsc, mainnet } from 'wagmi/chains'
+import { bsc, mainnet, sonic } from 'wagmi/chains'
 import { TCard } from "@/types"
 import { useTvl } from "@/hooks/useTvl"
 
@@ -12,13 +12,14 @@ export const TvlComp = () => {
 //  const time = 3 * 60 * 60 * 1000;
     const totalEth = useTvl(mainnet.id)
     const totalBnb = useTvl(bsc.id)
+    const totalS = useTvl(sonic.id)
     console.log(totalEth.error)
     useEffect(() => {
 
         setTvl([
             { namePool: "Mainnet", totalAmount: totalEth.total },
             { namePool: "BSC", totalAmount: totalBnb.total },
-            { namePool: "Sonic", totalAmount: 0n }
+            { namePool: "Sonic", totalAmount: totalS.total }
         ])
     }, [chainId])
 

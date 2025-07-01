@@ -3,18 +3,18 @@ import { Navigation } from "./components/Navigation";
 import { Navmenu } from "./components/NavMenu";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { TvlComp } from "@/components/TvlComp";
-import { useEffect, useState } from "react";
+//import { useEffect, useState } from "react";
 
 function App() {
   const { isConnected } = useAccount()
-  const [prices, setPrices] = useState({
+ /*  const [prices, setPrices] = useState({
     eth: 0,
     bnb: 0,
     s: 0
-  })
+  }) */
 
 
-  useEffect(() => {
+ /*  useEffect(() => {
     const getPrices = async () => {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,binancecoin,sonic&vs_currencies=usd');
       if (res) {
@@ -27,7 +27,7 @@ function App() {
       }
     }
     //getPrices()
-  }, [])
+  }, []) */
 
   return (
     <div className="flex flex-col w-full pb-10 items-center bg-[#1A1A1A] text-white">
