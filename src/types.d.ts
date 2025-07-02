@@ -2,7 +2,8 @@ import { IconType } from "react-icons/lib";
 
 export type TCard = {
   namePool: string;
-  totalAmount: bigint | string;
+  totalAmount: number;
+  usdPrice: number;
   isLoading?: boolean;
 };
 

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
 @import "tailwindcss";
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
@@ -9,9 +11,10 @@
 
 @theme {
   --font-display: "Oswald", "sans-serif"; 
+  --font-oswald: Oswald !important;
 }
 
-.ju367v6c   {
+.ju367v2q {
     display: none;
 }
 

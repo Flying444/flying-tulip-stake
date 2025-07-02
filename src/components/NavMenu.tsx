@@ -1,13 +1,11 @@
 import { TabItem, Tabs } from "flowbite-react";
 import { Deposit } from "@/components/deposit/Deposit";
 import { Withdraw } from '@/components/withdraw/Withdraw';
-import { useAccount } from "wagmi";
 import { PiHandDeposit  } from "react-icons/pi";
 import { GiTakeMyMoney } from "react-icons/gi";
 
 
 export const Navmenu = () => {
-    const {isConnected} = useAccount()
     return (
         <div className="flex h-full justify-center w-full items-center">
         <Tabs aria-label="" className="flex items-center"  variant="underline" >
@@ -15,7 +13,7 @@ export const Navmenu = () => {
                 <Deposit />
             </TabItem>
             <TabItem title="Withdraw" icon={PiHandDeposit} className="active:text-[#F5F57A] active:border-[#F5F57A] hover:cursor-pointer">
-                {isConnected && (<Withdraw />)}
+                <Withdraw />
             </TabItem>
         </Tabs>
         </div>

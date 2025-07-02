@@ -35,17 +35,33 @@ export const testnet = {
 };
 
 export const minMax = {
-        eth: {
-            min: '0.1',
-            max: '32'
-        },
-        bnb: {
-            min: '1',
-            max: '10000',
-        },
-        s: {
-            min: '300',
-            max: '500000'
-        }
+  eth: {
+    min: 0.1,
+    max: 32
+  },
+  bnb: {
+    min: 1,
+    max: 10000,
+  },
+  s: {
+    min: 300,
+    max: 500000
+  }
 
-    }
+}
+
+export const Aprs = {
+  1: {
+    min: 18.7, max: 27.8
+  },
+  56: {
+    min: 12.3, max: 26.2
+  },
+  146: {
+    min: 21.6, max: 32.3
+  }
+}
+
+export const SETH = {
+    min: 27.8, max: 34.7
+}

@@ -14,7 +14,7 @@ export const useGetStaked = () => {
 
 
     return {
-        totalStaked: totalStaked !== undefined && totalStaked !== null ? formatEther(totalStaked as bigint) : 0n,
+        totalStaked: totalStaked !== undefined && totalStaked !== null ? formatEther(totalStaked as bigint) : '0.0',
         isPending,
         error
     }
