@@ -3,12 +3,14 @@ import { TvlCard } from "./ui/TvlCard"
 import { bsc, mainnet, sonic } from 'wagmi/chains'
 import { TCard } from "@/types"
 import { useTvl } from "@/hooks/useTvl"
+import { useInterval } from "@/hooks/useInterval"
 import { useGetSoloPool } from "@/hooks/useGetSoloPool";
 import { ContextPrices } from '@/context/ContextProvider'
 import { calcToUsd } from "@/utils/helpers";
 
 export const TvlComp = () => {
-    const { ethPrice, bnbPrice, sPrice } = useContext(ContextPrices);
+    const { ethPrice, bnbPrice, sPrice } = useContext(ContextPrices)
+    const THREE_HOURS_IN_MS = 3 * 60 * 60 * 1000
 
     const [tvl, setTvl] = useState<TCard[]>([
         { namePool: "Mainnet", totalAmount: 0, usdPrice: 0 },
@@ -21,7 +23,13 @@ export const TvlComp = () => {
     const totalS = useTvl(sonic.id)
     const totalSolo = useGetSoloPool();
 
-
+    useInterval(() => {
+        totalEth.refetch()
+        totalBnb.refetch()
+        totalS.refetch()
+        totalSolo.refetch()
+        console.log('Refetching TVL data...');
+    }, THREE_HOURS_IN_MS);
 
     useEffect(() => {
 

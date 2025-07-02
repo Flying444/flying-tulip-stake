@@ -8,7 +8,7 @@ export const useTvl = (chainId: number) => {
 
   const useAbi = chainId === 1 ? MainnetABI : chainId === 56 ? BscABI : SonicAbi
  
-  const { data: totalTvl, isPending, error } = useReadContract({
+  const { data: totalTvl, isPending, error, refetch } = useReadContract({
     abi: useAbi.abi,
     address: useAbi.address,
     functionName: "totalInvested",
@@ -20,6 +20,7 @@ export const useTvl = (chainId: number) => {
   return {
     total: parseFloat(total),
     isPending,
-    error
+    error,
+    refetch
   }
 } 

@@ -5,7 +5,7 @@ import { mainnet } from "wagmi/chains";
 
 export const useGetSoloPool = () => {
   
-  const {data: total, isPending: isPendingSolo, error: errorSolo} = useReadContract({
+  const {data: total, isPending: isPendingSolo, error: errorSolo, refetch} = useReadContract({
     abi: MainnetABI.abi,
     address: MainnetABI.address,
     functionName: "totalSoloPoolInvested",
@@ -16,6 +16,7 @@ export const useGetSoloPool = () => {
   return {
     total: parseFloat(totalSolo),
     isPendingSolo,
-    errorSolo
+    errorSolo,
+    refetch
   }
 } 

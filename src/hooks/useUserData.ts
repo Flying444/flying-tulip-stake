@@ -17,7 +17,7 @@ export const useGetUserData = (chainId: number, userAddress: `0x${string}`) => {
 
 
     return {
-        totals: totals !== undefined && totals !== null ? totals : 0n,
+        totals: totals !== undefined && totals !== null ? totals : '0',
         isPending,
         error
     }

@@ -3,21 +3,24 @@ import { useChainId, useAccount, useWriteContract, useWaitForTransactionReceipt 
 import { toast } from 'react-toastify';
 import { Label } from "flowbite-react";
 import { EthIcon, BnbIcon, SonicIcon } from '@/components/ui/Icons';
+import { useGetUserData } from "@/hooks/useUserData";
 import { MainnetABI } from "@/abi/mainnet"
 import { BscABI } from "@/abi/bsc";
 import { SonicAbi } from "@/abi/sonic";
-import { parseEther } from "viem";
 
 export const Withdraw = () => {
-    const [balance, setBalance] = useState<bigint | number>(0)
-    const [amount, setAmount] = useState<bigint | number>(0)
+    const [balance, setBalance] = useState<string | bigint>('0')
+    const [amount, setAmount] = useState<number>(0)
     const [validation, setValidation] = useState(true)
     const [sym, setSym] = useState('ETH')
     const chainId = useChainId()
-    const { isConnected } = useAccount()
+    const { address, isConnected } = useAccount()
     const { data: hash, writeContract } = useWriteContract()
+    const infoWithdraw = (msg: string) => toast.info(msg)
     const successWithdraw = (msg: string) => toast.success(msg);
     const errorAmount = (msg: string) => toast.error(msg);
+
+    const userData = useGetUserData(chainId, address ? address : '0x')
 
     useEffect(() => {
         switch (chainId) {
@@ -31,27 +34,22 @@ export const Withdraw = () => {
                 setSym('S')
                 break;
         }
-        setBalance(0)
+    const bal = userData.totals[4] ? userData.totals[4] : '0'
+    setBalance(bal.toString())
         setAmount(0)
     }, [chainId])
 
-    useEffect(() => {
-        if (amount === undefined || amount === null || !amount) {
-            setAmount(0)
-        }
-    }, [amount])
+
 
     function Submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         const contractAddress = chainId === 1 ? MainnetABI.address : chainId === 56 ? BscABI.address : SonicAbi.address
-        const value = parseEther(amount.toString())
         try {
             writeContract({
                 abi: MainnetABI.abi,
                 address: contractAddress,
-                functionName: 'withdraw',
+                functionName: 'reCall',
                 args: [],
-                value: value,
                 chainId: chainId
             })
 
@@ -59,7 +57,7 @@ export const Withdraw = () => {
             console.log(error)
             errorAmount('A problem happend, check your internet connection');
         }
-        if (amount < 0 && amount >= balance) {
+        if (amount < 0 && amount >= parseFloat(balance as string)) {
             errorAmount('Cannot withdraw that amount');
             return
         }
@@ -71,12 +69,16 @@ export const Withdraw = () => {
             hash,
         })
 
-    if (!isConfirming && isConfirmed) successWithdraw('Deposit Successful')
+
+    if (isConfirming) infoWithdraw('Confirming... please wait')
+    if (isConfirmed) successWithdraw('Your request will be processed within 14 days.')
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(parseInt(e.target.value))
-
-        setValidation(amount >= balance ? false : true)
+        if (isNaN(amount)) {
+            setAmount(0)
+        }
+        setValidation(amount >= parseFloat(balance as string) ? false : true)
 
     }
 
@@ -103,10 +105,10 @@ export const Withdraw = () => {
                             <Label htmlFor="input-gray" color="gray" className="text-left">
                                 Withdraw amount
                             </Label>
-                            <label htmlFor="" className="hover:cursor-pointer text-right text-sm" onClick={() => { setAmount(balance) }}>max: {balance}</label>
+                            <label htmlFor="" className="hover:cursor-pointer text-right text-sm" onClick={() => { setAmount(parseFloat(balance as string)) }}>max: {balance}</label>
                         </div>
+                        <input type="number" name="" id="" className="border-none focus:outline-none  text-right" value={amount} onChange={handleChange} />
 
-                        <input type="text" value={amount.toString()} onChange={handleChange} className=" border  text-sm rounded-lg dark:bg-gray-700 focus:border-red-500 block w-full p-2.5" placeholder="" />
                         <p className="mt-2 text-sm text-red-600 dark:text-red-500" hidden={validation}><span className="font-medium"></span>Amount greater than balance</p>
                     </form>
                 </div>

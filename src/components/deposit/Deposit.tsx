@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { useChainId, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { ContextPrices } from "@/context/ContextProvider";
 import { toast } from 'react-toastify';
@@ -6,6 +6,7 @@ import { minMax } from "@/utils/constants";
 import { useGetStakers } from "@/hooks/useGetStakers";
 import { useGetStaked } from "@/hooks/useGetStaked";
 import { useGetRewards } from "@/hooks/useGetRewards";
+import { calcProjection } from "@/utils/helpers";
 import { Aprs } from "@/utils/constants";
 import { LuUsers } from "react-icons/lu";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia";
@@ -16,6 +17,7 @@ import { MainnetABI } from "@/abi/mainnet"
 import { BscABI } from "@/abi/bsc";
 import { SonicAbi } from "@/abi/sonic";
 import { parseEther } from "viem";
+import { SETH } from "@/utils/constants";
 
 type AprsKey = keyof typeof Aprs;
 
@@ -28,6 +30,7 @@ export const Deposit = () => {
     const [projection, setProjection] = useState(1.87)
     const [sym, setSym] = useState<string>('ETH')
     const [apr, setapr] = useState<AprsKey>(1)
+    const [soloEth, setSoloEth] = useState(false)
     const { totalStakers: stakers, isPending: isLoadingStakers } = useGetStakers()
     const { totalStaked: staked, isPending: isLoadingStaked } = useGetStaked()
     const { totalReward: reward, isPending: isLoadingReward } = useGetRewards()
@@ -40,12 +43,13 @@ export const Deposit = () => {
     const errorDeposit = (msg: string) => toast.error(msg);
 
     const iconSize = 30
-    let actualPrice: number = ethPrice 
+    let actualPrice: number = ethPrice
 
     useEffect(() => {
-        let newMin: number = minMax.eth.min;
-        let newMax: number = minMax.eth.max;
+        let newMin: number = soloEth ? minMax.seth.min : minMax.eth.min;
+        let newMax: number = soloEth ? minMax.seth.max : minMax.eth.max;
         let newSym = 'ETH';
+        if (soloEth && chainId !== 1) setSoloEth(false)
         actualPrice = chainId === 1 ? ethPrice : chainId === 56 ? bnbPrice : sPrice
         switch (chainId) {
             case 1:
@@ -67,25 +71,46 @@ export const Deposit = () => {
                 setapr(146);
                 break;
         }
-        const proj = newMin * Aprs[apr].min
+
+        const ran = soloEth && chainId === 1 ? Aprs[apr].min : SETH.min
+        const { minGain } = calcProjection(newMin, ran, Aprs[apr].max)
         setRange({ min: newMin, max: newMax });
-        setProjection(proj)
-        setCalc(proj * actualPrice)
+        setProjection(minGain)
+        setCalc(minGain * actualPrice)
         setValueRange(newMin);
         setSym(newSym);
     }, [chainId])
 
     useEffect(() => {
-        setCalc(projection * actualPrice)
-        const calculation = projection * actualPrice
-        console.log(calculation, actualPrice, ethPrice)
-        setCalc(calculation)
-    }, [projection])
+        if (chainId === 1) {
+            const newMin: number = soloEth ? minMax.seth.min : minMax.eth.min;
+            const newMax: number = soloEth && chainId === 1 ? minMax.seth.max : minMax.eth.max;
+            const { minGain } = calcProjection(newMin, SETH.min, SETH.max)
+
+            setRange({ min: newMin, max: newMax });
+            setProjection(minGain)
+            setCalc(minGain * actualPrice)
+            setValueRange(newMin);
+        }
+    }, [soloEth])
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setValueRange(parseFloat(e.target.value))
-        const value = parseFloat(e.target.value) * Aprs[apr].min
-        setProjection(value)
+        const value = parseFloat(e.target.value);
+        setValueRange(value)
+
+        console.log(valueRange)
+        const { minGain } = calcProjection(value, soloEth ? SETH.min : Aprs[apr].min, soloEth ? SETH.min : Aprs[apr].max)
+        const proj = minGain
+        setProjection(proj)
+        const calculation = minGain * actualPrice
+        if (isNaN(calculation)) {
+            setCalc(0);
+        }
+        setCalc(calculation)
+
+        if (isNaN(value)) {
+            setValueRange(0.0);
+        }
     }
 
     function Submit(e: React.MouseEvent<HTMLButtonElement>) {
@@ -112,6 +137,14 @@ export const Deposit = () => {
         }
 
 
+    }
+
+    const handleBox = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSoloEth(e.target.checked)
+    }
+
+    const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setValueRange(parseFloat(e.target.value))
     }
 
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -146,7 +179,7 @@ export const Deposit = () => {
             <div className="flex flex-row w-full space-x-4 p-2">
                 <div className="flex flex-col bg-[#2C2C2C] w-1/2 justify-center items-center rounded-xl p-5 shadow">
                     <p>APR </p>
-                    <p>{Aprs[apr].min}%</p>
+                    <p>{soloEth ? SETH.min : Aprs[apr].min}%</p>
                 </div>
                 <div className="flex flex-col bg-[#2C2C2C] w-1/2 justify-center items-center rounded-xl p-5 shadow">
                     <p className="text-sm text-center">Project annual reward</p>
@@ -158,6 +191,14 @@ export const Deposit = () => {
                 </div>
             </div>
             <form className="flex w-full flex-col py-10 bg-[#2C2C2C] p-3 rounded-xl space-y-5 shadow">
+                {
+                    chainId === 1 && (
+                        <div className="flex w-full items-end justify-end">
+                            <input id="checkedSoloEth" checked={soloEth} type="checkbox" value='' onChange={handleBox} className="w-4 h-4 text-red-200 bg-gray-100 border-gray-300 rounded-sm dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                            <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium  ">Solo Staking</label>
+                        </div>
+                    )
+                }
                 <div className="flex w-full flex-col  ">
                     <div className="flex flex-row justify-center font-bold w-full">
 
@@ -167,18 +208,36 @@ export const Deposit = () => {
                                 <p>{sym}</p>
                             </div>
                         </div>
-                        <div className="flex w-1/2 justify-center items-center text-center">
+                        <div className="flex w-1/2 justify-center items-center ">
                             <h3>
-                                {valueRange}
+                                <input type="number" name="" id="" className="border-none focus:outline-none  text-right" value={valueRange} onChange={handleOnChange} />
                             </h3>
                         </div>
                     </div>
                     <div className="flex flex-col w-full p-3">
-                        <input id="rangeId" type="range" step={chainId === 146 ? 500 : 0.1} min={range.min} max={range.max} value={valueRange} onChange={handleOnChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
-                        <div className="flex flex-row w-full content-between">
-                            <p className="w-1/2 text-left">{range.min}</p>
-                            <p className="w-1/2 text-right">{range.max}</p>
-                        </div>
+                        {(chainId === 1 && soloEth) ? (
+                            <div className="flex flex-col space-y-2">
+                                <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
+                                    <input id="red-radio" checked={valueRange === minMax.seth.min} onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.min} name="colored-radio" className="w-4 h-4  bg-gray-100 border-gray-300 " />
+                                    <label htmlFor="bordered-checkbox-1" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">16</label>
+                                </div>
+                                <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
+                                    <input checked={valueRange === minMax.seth.max} id="bordered-checkbox-2" onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.max} name="bordered-checkbox" className="w-4 h-4  bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500" />
+                                    <label htmlFor="bordered-checkbox-2" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">32</label>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <input id="rangeId" type="range" step={chainId === 146 ? 500 : 0.5} min={range.min} max={range.max} value={valueRange} onChange={handleOnChange} className="w-full h-2 bg-gray-200 rounded-lg text-[#F5F57A] cursor-pointer dark:bg-gray-700" />
+                                <div className="flex flex-row w-full content-between">
+                                    <p className="w-1/2 text-left">{range.min}</p>
+                                    <p className="w-1/2 text-right">{range.max}</p>
+                                </div>
+                            </>
+                        )
+
+                        }
+
                     </div>
 
                 </div>

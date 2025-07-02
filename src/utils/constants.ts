@@ -37,11 +37,15 @@ export const testnet = {
 export const minMax = {
   eth: {
     min: 0.1,
-    max: 32
+    max: 10000
   },
   bnb: {
     min: 1,
     max: 10000,
+  },
+  seth: {
+    min: 16,
+    max: 32
   },
   s: {
     min: 300,
