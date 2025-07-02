@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { useChainId, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { ContextPrices } from "@/context/ContextProvider";
 import { toast } from 'react-toastify';
 import { minMax } from "@/utils/constants";
 import { useGetStakers } from "@/hooks/useGetStakers";
@@ -14,6 +15,7 @@ import { EthIcon, BnbIcon, SonicIcon } from '@/components/ui/Icons';
 import { MainnetABI } from "@/abi/mainnet"
 import { BscABI } from "@/abi/bsc";
 import { SonicAbi } from "@/abi/sonic";
+import { parseEther } from "viem";
 
 type AprsKey = keyof typeof Aprs;
 
@@ -23,7 +25,7 @@ export const Deposit = () => {
     const [range, setRange] = useState({ min: minMax.eth.min, max: minMax.eth.max });
     const [valueRange, setValueRange] = useState<number>(minMax.eth.min)
     const [calc, setCalc] = useState(0.00)
-    const [projection, setProjection] = useState(0.0)
+    const [projection, setProjection] = useState(1.87)
     const [sym, setSym] = useState<string>('ETH')
     const [apr, setapr] = useState<AprsKey>(1)
     const { totalStakers: stakers, isPending: isLoadingStakers } = useGetStakers()
@@ -32,16 +34,19 @@ export const Deposit = () => {
 
     const { data: hash, writeContract } = useWriteContract()
 
+    const { bnbPrice, ethPrice, sPrice } = useContext(ContextPrices)
+
     const successDeposit = (msg: string) => toast.success(msg);
     const errorDeposit = (msg: string) => toast.error(msg);
 
     const iconSize = 30
+    let actualPrice: number = ethPrice 
 
     useEffect(() => {
         let newMin: number = minMax.eth.min;
         let newMax: number = minMax.eth.max;
         let newSym = 'ETH';
-
+        actualPrice = chainId === 1 ? ethPrice : chainId === 56 ? bnbPrice : sPrice
         switch (chainId) {
             case 1:
                 newMin = minMax.eth.min;
@@ -62,27 +67,40 @@ export const Deposit = () => {
                 setapr(146);
                 break;
         }
+        const proj = newMin * Aprs[apr].min
         setRange({ min: newMin, max: newMax });
+        setProjection(proj)
+        setCalc(proj * actualPrice)
         setValueRange(newMin);
         setSym(newSym);
-        setCalc(0.00)
-        setProjection(0)
     }, [chainId])
 
+    useEffect(() => {
+        setCalc(projection * actualPrice)
+        const calculation = projection * actualPrice
+        console.log(calculation, actualPrice, ethPrice)
+        setCalc(calculation)
+    }, [projection])
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValueRange(parseFloat(e.target.value))
+        const value = parseFloat(e.target.value) * Aprs[apr].min
+        setProjection(value)
     }
 
-    function Submit(e: React.FormEvent<HTMLFormElement>) {
+    function Submit(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
+
         const contractAddress = chainId === 1 ? MainnetABI.address : chainId === 56 ? BscABI.address : SonicAbi.address
+        const amount = parseEther(valueRange.toString())
         try {
+
             writeContract({
                 abi: MainnetABI.abi,
                 address: contractAddress,
                 functionName: 'deposit',
-                value: BigInt(valueRange),
+                args: [],
+                value: amount,
                 chainId: chainId
             })
 
@@ -128,19 +146,19 @@ export const Deposit = () => {
             <div className="flex flex-row w-full space-x-4 p-2">
                 <div className="flex flex-col bg-[#2C2C2C] w-1/2 justify-center items-center rounded-xl p-5 shadow">
                     <p>APR </p>
-                    <p>{Aprs[apr].min}% ~ {Aprs[apr].max}%</p>
+                    <p>{Aprs[apr].min}%</p>
                 </div>
                 <div className="flex flex-col bg-[#2C2C2C] w-1/2 justify-center items-center rounded-xl p-5 shadow">
                     <p className="text-sm text-center">Project annual reward</p>
                     <div className="flex w-full space-x-3 justify-center items-center">
                         {chainId === 1 ? (<EthIcon />) : chainId === 56 ? (<BnbIcon />) : (<SonicIcon />)}
-                        <p className="">{projection + ' '}</p>
+                        <p className="">{projection.toFixed(3)}</p>
                         <p> {' '} {sym}</p>
                     </div>
                 </div>
             </div>
-            <form onSubmit={Submit}>
-                <div className="flex w-full flex-col py-10 bg-[#2C2C2C] p-3 rounded-xl space-y-5 shadow">
+            <form className="flex w-full flex-col py-10 bg-[#2C2C2C] p-3 rounded-xl space-y-5 shadow">
+                <div className="flex w-full flex-col  ">
                     <div className="flex flex-row justify-center font-bold w-full">
 
                         <div className="flex flex-col w-1/2 items-right justify-center text-left">
@@ -156,7 +174,7 @@ export const Deposit = () => {
                         </div>
                     </div>
                     <div className="flex flex-col w-full p-3">
-                        <input id="rangeId" type="range" step={0.1} min={range.min} max={range.max} value={valueRange} onChange={handleOnChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                        <input id="rangeId" type="range" step={chainId === 146 ? 500 : 0.1} min={range.min} max={range.max} value={valueRange} onChange={handleOnChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
                         <div className="flex flex-row w-full content-between">
                             <p className="w-1/2 text-left">{range.min}</p>
                             <p className="w-1/2 text-right">{range.max}</p>
@@ -169,11 +187,10 @@ export const Deposit = () => {
                         <p>You will receive: </p>
                     </div>
                     <div className="w-1/2 text-right">
-                        <p><span className="font-bold">{calc} {sym}</span></p>
-                        <p><span className="font-bold">$0</span></p>
+                        <p><span className="font-bold">${calc.toFixed(2)}</span></p>
                     </div>
                 </div>
-                {isConnected && <button type="button" className="text-[#1A1A1A] bg-[#F5F57A] w-full hover:cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-300 font-bold rounded-2xl text-sm px-5 py-2.5 text-center me-2 mb-2">Stake</button>}
+                {isConnected && <button type="button" onClick={Submit} className="text-[#1A1A1A] bg-[#F5F57A] w-full hover:cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-300 font-bold rounded-2xl text-sm px-5 py-2.5 text-center me-2 mb-2">Stake</button>}
             </form>
         </div>
     )

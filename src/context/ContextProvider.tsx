@@ -26,14 +26,15 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
 
     const getUsdPrices = async () => {
         try {
-            const res = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,binancecoin,sonic-3&vs_currencies=usd'); //
-            if (res) {
+            const res = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,binancecoin,sonic-3&vs_currencies=usd');
+            const data = res.data
                 setPrices({
-                    ethPrice: res.data['ethereum'].usd,
-                    bnbPrice: res.data['binancecoin'].usd,
-                    sPrice: res.data['sonic-3'].usd
+                    ethPrice: data['ethereum'].usd,
+                    bnbPrice: data['binancecoin'].usd,
+                    sPrice: data['sonic-3'].usd
                 })
-            }
+                console.log(res.data['ethereum'].usd, prices.ethPrice)
+
         } catch (error) {
             console.log(error)
         }

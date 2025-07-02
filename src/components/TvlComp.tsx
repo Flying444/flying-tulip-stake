@@ -21,6 +21,8 @@ export const TvlComp = () => {
     const totalS = useTvl(sonic.id)
     const totalSolo = useGetSoloPool();
 
+
+
     useEffect(() => {
 
         const ether = calcToUsd(totalEth.total, ethPrice)
@@ -36,7 +38,7 @@ export const TvlComp = () => {
         ])
 
 
-    }, [])
+    }, [ethPrice, bnbPrice, sPrice])
 
 
 
@@ -48,6 +50,7 @@ export const TvlComp = () => {
                     <TvlCard key={i} namePool={item.namePool} totalAmount={item.totalAmount} isLoading={totalEth.isPending} usdPrice={item.usdPrice} />
                 ))
             }
+
         </div>
 
     )
