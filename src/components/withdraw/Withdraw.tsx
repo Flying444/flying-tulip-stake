@@ -6,6 +6,7 @@ import { EthIcon, BnbIcon, SonicIcon } from '@/components/ui/Icons';
 import { MainnetABI } from "@/abi/mainnet"
 import { BscABI } from "@/abi/bsc";
 import { SonicAbi } from "@/abi/sonic";
+import { parseEther } from "viem";
 
 export const Withdraw = () => {
     const [balance, setBalance] = useState<bigint | number>(0)
@@ -43,12 +44,14 @@ export const Withdraw = () => {
     function Submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         const contractAddress = chainId === 1 ? MainnetABI.address : chainId === 56 ? BscABI.address : SonicAbi.address
+        const value = parseEther(amount.toString())
         try {
             writeContract({
                 abi: MainnetABI.abi,
                 address: contractAddress,
                 functionName: 'withdraw',
-                value: BigInt(amount),
+                args: [],
+                value: value,
                 chainId: chainId
             })
 
