@@ -5,6 +5,7 @@ export type TCard = {
   totalAmount: number;
   usdPrice: number;
   isLoading?: boolean;
+  totalInvested: number;
 };
 
 export type TTvlContract = {

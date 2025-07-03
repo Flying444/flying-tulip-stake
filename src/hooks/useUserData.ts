@@ -7,7 +7,7 @@ export const useGetUserData = (chainId: number, userAddress: `0x${string}`) => {
 
     const useAbi = chainId === 1 ? MainnetABI : chainId === 56 ? BscABI : SonicAbi
 
-    const { data: totals, isPending, error } = useReadContract({
+    const { data: totals, isPending, error, refetch } = useReadContract({
         abi: useAbi.abi,
         address: useAbi.address,
         functionName: "userInfo",
@@ -17,9 +17,10 @@ export const useGetUserData = (chainId: number, userAddress: `0x${string}`) => {
 
 
     return {
-        totals: totals !== undefined && totals !== null ? totals : '0',
+        totals: totals ? totals : '0',
         isPending,
-        error
+        error,
+        refetch
     }
 
 
