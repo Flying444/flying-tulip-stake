@@ -22,7 +22,7 @@ export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInves
       break;
   }
 
-  const amountUsd = calcToUsd(totalAmount, usdPrice).toFixed(2)
+  const amountUsd = calcToUsd(totalInvested, usdPrice).toFixed(2)
 
   return (
     <div className="flex flex-col w-full md:w-72 h-auto justify-center items-center p-5 rounded-md bg-[#2C2C2C] space-y-2">
