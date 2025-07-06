@@ -12,7 +12,9 @@ import { calcToUsd } from "@/utils/helpers";
 
 export const TvlComp = () => {
     const {address} = useAccount();
-    const { ethPrice, bnbPrice, sPrice } = useContext(ContextPrices)
+    const { prices } = useContext(ContextPrices)
+
+    const { ethPrice, bnbPrice, sPrice } = prices
     const THREE_HOURS_IN_MS = 3 * 60 * 60 * 1000
 
     const [tvl, setTvl] = useState<TCard[]>([
