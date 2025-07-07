@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useContext } from "react"
 import { useChainId, useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { genRandomUser } from "@/utils/helpers"
 import { ContextPrices } from "@/context/ContextProvider";
 import { toast } from 'react-toastify';
 import { minMax } from "@/utils/constants";
 import { useGetStakers } from "@/hooks/useGetStakers";
-//import { useGetStaked } from "@/hooks/useGetStaked";
+import { useGetStaked } from "@/hooks/useGetStaked";
 import { useGetRewards } from "@/hooks/useGetRewards";
 import { calcProjection } from "@/utils/helpers";
 import { Aprs } from "@/utils/constants";
 import { LuUsers } from "react-icons/lu";
-//import { LiaMoneyBillWaveSolid } from "react-icons/lia";
-import { LiaTrophySolid } from "react-icons/lia";
+import { LiaMoneyBillWaveSolid, LiaTrophySolid } from "react-icons/lia";
 import { Spinner } from "flowbite-react";
 import { EthIcon, BnbIcon, SonicIcon } from '@/components/ui/Icons';
 import { MainnetABI } from "@/abi/mainnet"
@@ -33,14 +31,12 @@ export const Deposit = () => {
     const [apr, setapr] = useState<AprsKey>(1)
     const [soloEth, setSoloEth] = useState(false)
     const { totalStakers: stakers, isPending: isLoadingStakers } = useGetStakers()
-   // const { totalStaked: staked, isPending: isLoadingStaked } = useGetStaked()
+    const { totalStaked: staked, isPending: isLoadingStaked } = useGetStaked()
     const { totalReward: reward, isPending: isLoadingReward } = useGetRewards()
-
-    const [addStake, setAddStaker] = useState(0)
 
     const { data: hash, writeContract } = useWriteContract()
 
-    const { prices, currentTime } = useContext(ContextPrices)
+    const { prices } = useContext(ContextPrices)
     const { bnbPrice, ethPrice, sPrice } = prices
     const successDeposit = (msg: string) => toast.success(msg);
     const errorDeposit = (msg: string) => toast.error(msg);
@@ -84,10 +80,10 @@ export const Deposit = () => {
         setCalc(minGain * actualPrice)
         setValueRange(newMin);
         setSym(newSym);
-    }, [chainId])
+    }, [chainId, soloEth])
 
-    useEffect(() => {
-        if (chainId === 1) {
+useEffect(() => {
+        if (chainId === 1 && soloEth) {
             const newMin: number = soloEth ? minMax.seth.min : minMax.eth.min;
             const newMax: number = soloEth && chainId === 1 ? minMax.seth.max : minMax.eth.max;
             const { minGain } = calcProjection(newMin, SETH.min, SETH.max)
@@ -97,31 +93,28 @@ export const Deposit = () => {
             setCalc(minGain * actualPrice)
             setValueRange(newMin);
         }
-    }, [soloEth])
+    }, [soloEth]) 
 
 
-    if(currentTime.hours <= 0 ){
+/*     if(currentTime.hours <= 0 ){
         const tot = parseFloat(stakers.toString()) + genRandomUser()
         setAddStaker(tot)
-    }
+    } */
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value);
         setValueRange(value)
-
+        console.log(value)
         console.log(valueRange)
         const { minGain } = calcProjection(value, soloEth ? SETH.min : Aprs[apr].min, soloEth ? SETH.min : Aprs[apr].max)
         const proj = minGain
         setProjection(proj)
         const calculation = minGain * actualPrice
-        if (isNaN(calculation)) {
-            setCalc(0);
-        }
+        if (isNaN(calculation)) setCalc(0);
+
         setCalc(calculation)
 
-        if (isNaN(value)) {
-            setValueRange(0.0);
-        }
+        if (isNaN(value)) setValueRange(0.0);
     }
 
     function Submit(e: React.MouseEvent<HTMLButtonElement>) {
@@ -155,7 +148,8 @@ export const Deposit = () => {
     }
 
     const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setValueRange(parseFloat(e.target.value))
+        console.log(e.target.value, typeof e.target.value)
+        setValueRange(parseInt(e.target.value))
     }
 
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -171,14 +165,14 @@ export const Deposit = () => {
 
                 <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LuUsers size={iconSize} />
-                    {isLoadingStakers ? (<Spinner />) : (<p>{addStake}</p>)}
+                    {isLoadingStakers ? (<Spinner />) : (<p>{stakers}</p>)}
                     <p>Total Stakers</p>
                 </div>
-               {/*  <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
+               <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LiaMoneyBillWaveSolid size={iconSize} />
                     {isLoadingStaked ? (<Spinner />) : (<p>{parseFloat(staked).toFixed(4)}</p>)}
                     <p>Total Staked</p>
-                </div> */}
+                </div>
                 <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LiaTrophySolid size={iconSize} />
                     {isLoadingReward ? (<Spinner />) : (<p>{parseFloat(reward).toFixed(4)}</p>)}
@@ -229,11 +223,11 @@ export const Deposit = () => {
                         {(chainId === 1 && soloEth) ? (
                             <div className="flex flex-col space-y-2">
                                 <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
-                                    <input id="red-radio" checked={valueRange === minMax.seth.min} onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.min} name="colored-radio" className="w-4 h-4  bg-gray-100 border-gray-300 " />
+                                    <input id="red-radio" checked={valueRange === minMax.seth.min} onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={String(minMax.seth.min)} name="colored-radio" className="w-4 h-4  bg-gray-100 border-gray-300 " />
                                     <label htmlFor="bordered-checkbox-1" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">16</label>
                                 </div>
                                 <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
-                                    <input checked={valueRange === minMax.seth.max} id="bordered-checkbox-2" onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.max} name="bordered-checkbox" className="w-4 h-4  bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500" />
+                                    <input checked={valueRange === minMax.seth.max} id="bordered-checkbox-2" onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={String(minMax.seth.max)} name="bordered-checkbox" className="w-4 h-4  bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500" />
                                     <label htmlFor="bordered-checkbox-2" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">32</label>
                                 </div>
                             </div>
@@ -252,14 +246,14 @@ export const Deposit = () => {
                     </div>
 
                 </div>
-                {/* <div className="flex flex-row font-bold text-sm w-full">
+               {/*  <div className="flex flex-row font-bold text-sm w-full">
                     <div className="w-1/2 text-left">
                         <p>You will receive: </p>
                     </div>
                     <div className="w-1/2 text-right">
                         <p><span className="font-bold">${calc.toFixed(2)}</span></p>
                     </div>
-                </div> */}
+                </div>  */}
                 {isConnected && <button type="button" onClick={Submit} className="text-[#1A1A1A] bg-[#F5F57A] w-full hover:cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-300 font-bold rounded-2xl text-sm px-5 py-2.5 text-center me-2 mb-2">Stake</button>}
             </form>
         </div>

@@ -1,17 +1,13 @@
-import { useContext, useState } from "react";
 import { TCard } from '../../types'
-import { ContextPrices } from "@/context/ContextProvider";
 import { Spinner } from "flowbite-react";
 import { EthIcon, BnbIcon, SonicIcon } from './Icons';
-import { calcToUsd, foundsAdd } from '@/utils/helpers';
+import { calcToUsd } from '@/utils/helpers';
 
 export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInvested }: TCard) => {
-  const { currentTime } = useContext(ContextPrices)
-  const [newAmount, setNewAmount] = useState(0)
 
   let Icon = EthIcon
   let symbol: string = 'eth'
-  
+
   switch (namePool) {
     case "Sonic":
       symbol = 'S'
@@ -26,14 +22,7 @@ export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInves
       break;
   }
 
-  if(currentTime.hours <= 0 ){
-    const genAmount = foundsAdd(symbol)
-    setNewAmount(genAmount);
-  }
-
-  const amountUsd = calcToUsd((totalInvested + newAmount), usdPrice).toFixed(2)
-
-
+  const amountUsd = calcToUsd(totalInvested, usdPrice).toFixed(2)
 
   return (
     <div className="flex flex-col w-full md:w-72 h-auto justify-center items-center p-5 rounded-md bg-[#2C2C2C] space-y-2">
@@ -54,12 +43,12 @@ export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInves
         <div className='flex w-1/2 space-x-2 justify-end'>
           <p className='text-xs'>{totalInvested ? totalInvested.toFixed(3) : 0}</p>
           <p className='text-xs'>{symbol}</p>
-           
+
         </div>
       </div>
       <div className='flex w-full items-end'>
-          <p className='w-full text-xs text-right'>${amountUsd ? parseFloat(amountUsd).toFixed(2) : '0'}</p>
-        </div>
+        <p className='w-full text-xs text-right'>${amountUsd ? parseFloat(amountUsd).toFixed(2) : '0'}</p>
+      </div>
     </div>
   );
 }
