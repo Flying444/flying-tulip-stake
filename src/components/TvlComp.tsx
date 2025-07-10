@@ -12,10 +12,10 @@ import { calcToUsd } from "@/utils/helpers";
 
 export const TvlComp = () => {
     const {address} = useAccount();
-    const { prices } = useContext(ContextPrices)
+    const { prices, currentTotals } = useContext(ContextPrices)
 
     const { ethPrice, bnbPrice, sPrice } = prices
-    const THREE_HOURS_IN_MS = 3 * 60 * 60 * 1000
+    const FIVE_SECS = 5000
 
     const [tvl, setTvl] = useState<TCard[]>([
         { namePool: "Mainnet", totalAmount: 0, usdPrice: 0, totalInvested: 0 },
@@ -37,26 +37,25 @@ export const TvlComp = () => {
         totalBnb.refetch()
         totalS.refetch()
         totalSolo.refetch()
-        console.log('Refetching TVL data...');
-    }, THREE_HOURS_IN_MS);
+    }, FIVE_SECS);
 
     useEffect(() => {
 
-        const ether = calcToUsd(totalEth.total, ethPrice)
-        const bnb = calcToUsd(totalBnb.total, bnbPrice)
-        const solo = calcToUsd(totalSolo.total, ethPrice)
-        const totalson = calcToUsd(totalS.total, sPrice)
+        const ether = calcToUsd(totalEth.total + currentTotals.totalEth, ethPrice)
+        const bnb = calcToUsd(totalBnb.total + currentTotals.totalBnb, bnbPrice)
+        const solo = calcToUsd(totalSolo.total + 0, ethPrice)
+        const totalson = calcToUsd(totalS.total + currentTotals.totalS, sPrice)
         
-        const ethInv = parseFloat(totalInvEth.totals[0] as string)
+        const ethInv =  parseFloat(totalInvEth.totals[0] as string)
         const soloEthInv = parseFloat(totalInvEth.totals[1] as string)
         const bnbInv = parseFloat(totalInvbnb.totals[0] as string)
         const sInv = parseFloat(totalInvs.totals[0] as string)
 
         setTvl([
-            { namePool: "Mainnet", totalAmount: totalEth.total, usdPrice: ether, totalInvested: ethInv },
-            { namePool: "Solo Staking", totalAmount: totalSolo.total, usdPrice: solo, totalInvested: soloEthInv },
-            { namePool: "BSC", totalAmount: totalBnb.total, usdPrice: bnb, totalInvested: bnbInv},
-            { namePool: "Sonic", totalAmount: totalS.total, usdPrice: totalson, totalInvested: sInv }
+            { namePool: "Mainnet", totalAmount: totalEth.total, usdPrice: ether, totalInvested: ethInv + currentTotals.totalEth},
+            { namePool: "Solo Staking", totalAmount: totalSolo.total, usdPrice: solo, totalInvested: soloEthInv + 0 },
+            { namePool: "BSC", totalAmount: totalBnb.total, usdPrice: bnb, totalInvested: bnbInv + currentTotals.totalBnb},
+            { namePool: "Sonic", totalAmount: totalS.total, usdPrice: totalson, totalInvested: sInv + currentTotals.totalS}
         ])
 
 

@@ -12,7 +12,7 @@ export const useGetStakers = () => {
     });
 
     return {
-        totalStakers: totalStakers ? totalStakers : 0,
+        totalStakers: totalStakers ? totalStakers : '0',
         isPending,
         error
     }

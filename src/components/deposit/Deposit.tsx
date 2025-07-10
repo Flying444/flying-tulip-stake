@@ -30,25 +30,27 @@ export const Deposit = () => {
     const [sym, setSym] = useState<string>('ETH')
     const [apr, setapr] = useState<AprsKey>(1)
     const [soloEth, setSoloEth] = useState(false)
+    const [currentStakers, setCurrentStakers] = useState(0)
+
     const { totalStakers: stakers, isPending: isLoadingStakers } = useGetStakers()
     const { totalStaked: staked, isPending: isLoadingStaked } = useGetStaked()
     const { totalReward: reward, isPending: isLoadingReward } = useGetRewards()
 
     const { data: hash, writeContract } = useWriteContract()
 
-    const { prices } = useContext(ContextPrices)
+    const { prices, currentTotals } = useContext(ContextPrices)
     const { bnbPrice, ethPrice, sPrice } = prices
     const successDeposit = (msg: string) => toast.success(msg);
     const errorDeposit = (msg: string) => toast.error(msg);
 
     const iconSize = 30
+
     let actualPrice: number = ethPrice
-
-    console.log(calc)
-
     useEffect(() => {
         let newMin: number = soloEth ? minMax.seth.min : minMax.eth.min;
         let newMax: number = soloEth ? minMax.seth.max : minMax.eth.max;
+        console.log(calc)
+        let stk = parseInt(stakers as string)
         let newSym = 'ETH';
         if (soloEth && chainId !== 1) setSoloEth(false)
         actualPrice = chainId === 1 ? ethPrice : chainId === 56 ? bnbPrice : sPrice
@@ -57,19 +59,25 @@ export const Deposit = () => {
                 newMin = minMax.eth.min;
                 newMax = minMax.eth.max;
                 newSym = 'ETH';
+                stk += currentTotals['totalStakersEth']
                 setapr(1)
+                setCurrentStakers(stk)
                 break;
             case 56:
                 newMin = minMax.bnb.min;
                 newMax = minMax.bnb.max;
                 newSym = 'BNB';
+                stk += currentTotals['totalStakersBnb']
                 setapr(56);
+                setCurrentStakers(stk)
                 break;
             case 146:
                 newMin = minMax.s.min;
                 newMax = minMax.s.max;
                 newSym = 'S';
+                stk += currentTotals['totalStakersS']
                 setapr(146);
+                setCurrentStakers(stk)
                 break;
         }
 
@@ -80,26 +88,20 @@ export const Deposit = () => {
         setCalc(minGain * actualPrice)
         setValueRange(newMin);
         setSym(newSym);
-    }, [chainId, soloEth])
+    }, [chainId])
 
-useEffect(() => {
-        if (chainId === 1 && soloEth) {
+    useEffect(() => {
+        if (chainId === 1) {
             const newMin: number = soloEth ? minMax.seth.min : minMax.eth.min;
             const newMax: number = soloEth && chainId === 1 ? minMax.seth.max : minMax.eth.max;
             const { minGain } = calcProjection(newMin, SETH.min, SETH.max)
 
             setRange({ min: newMin, max: newMax });
             setProjection(minGain)
-            setCalc(minGain * actualPrice)
+            // setCalc(minGain * actualPrice)
             setValueRange(newMin);
         }
-    }, [soloEth]) 
-
-
-/*     if(currentTime.hours <= 0 ){
-        const tot = parseFloat(stakers.toString()) + genRandomUser()
-        setAddStaker(tot)
-    } */
+    }, [soloEth])
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value);
@@ -109,10 +111,10 @@ useEffect(() => {
         const { minGain } = calcProjection(value, soloEth ? SETH.min : Aprs[apr].min, soloEth ? SETH.min : Aprs[apr].max)
         const proj = minGain
         setProjection(proj)
-        const calculation = minGain * actualPrice
-        if (isNaN(calculation)) setCalc(0);
+        //  const calculation = minGain * actualPrice
+        //  if (isNaN(calculation)) setCalc(0);
 
-        setCalc(calculation)
+        // setCalc(calculation)
 
         if (isNaN(value)) setValueRange(0.0);
     }
@@ -123,7 +125,6 @@ useEffect(() => {
         const contractAddress = chainId === 1 ? MainnetABI.address : chainId === 56 ? BscABI.address : SonicAbi.address
         const amount = parseEther(valueRange.toString())
         try {
-
             writeContract({
                 abi: MainnetABI.abi,
                 address: contractAddress,
@@ -132,15 +133,10 @@ useEffect(() => {
                 value: amount,
                 chainId: chainId
             })
-
-
         } catch (error) {
             console.log(error)
             errorDeposit('Your transaction could not be processed. Check your internet conenction and Try again later')
-
         }
-
-
     }
 
     const handleBox = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,8 +144,11 @@ useEffect(() => {
     }
 
     const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.value, typeof e.target.value)
-        setValueRange(parseInt(e.target.value))
+        const value = parseFloat(e.target.value)
+        const { minGain } = calcProjection(value, soloEth ? SETH.min : Aprs[apr].min, soloEth ? SETH.min : Aprs[apr].max)
+        const proj = minGain
+        setProjection(proj)
+        setValueRange(value)
     }
 
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -165,10 +164,10 @@ useEffect(() => {
 
                 <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LuUsers size={iconSize} />
-                    {isLoadingStakers ? (<Spinner />) : (<p>{stakers}</p>)}
+                    {isLoadingStakers ? (<Spinner />) : (<p>{currentStakers}</p>)}
                     <p>Total Stakers</p>
                 </div>
-               <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
+                <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LiaMoneyBillWaveSolid size={iconSize} />
                     {isLoadingStaked ? (<Spinner />) : (<p>{parseFloat(staked).toFixed(4)}</p>)}
                     <p>Total Staked</p>
@@ -223,11 +222,11 @@ useEffect(() => {
                         {(chainId === 1 && soloEth) ? (
                             <div className="flex flex-col space-y-2">
                                 <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
-                                    <input id="red-radio" checked={valueRange === minMax.seth.min} onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={String(minMax.seth.min)} name="colored-radio" className="w-4 h-4  bg-gray-100 border-gray-300 " />
+                                    <input id="radio16" checked={valueRange === minMax.seth.min} onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.min} name="colored-radio" className="w-4 h-4  bg-gray-100 border-gray-300 " />
                                     <label htmlFor="bordered-checkbox-1" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">16</label>
                                 </div>
                                 <div className="flex items-center ps-4 border border-gray-200 rounded-sm dark:border-gray-700">
-                                    <input checked={valueRange === minMax.seth.max} id="bordered-checkbox-2" onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={String(minMax.seth.max)} name="bordered-checkbox" className="w-4 h-4  bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500" />
+                                    <input checked={valueRange === minMax.seth.max} id="radio32" onChange={handleRadio} style={{ transform: 'scale(1.3)' }} type="radio" value={minMax.seth.max} name="bordered-checkbox" className="w-4 h-4  bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500" />
                                     <label htmlFor="bordered-checkbox-2" className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">32</label>
                                 </div>
                             </div>
@@ -246,7 +245,7 @@ useEffect(() => {
                     </div>
 
                 </div>
-               {/*  <div className="flex flex-row font-bold text-sm w-full">
+                {/*  <div className="flex flex-row font-bold text-sm w-full">
                     <div className="w-1/2 text-left">
                         <p>You will receive: </p>
                     </div>

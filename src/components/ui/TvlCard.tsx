@@ -33,7 +33,7 @@ export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInves
         <div className='flex w-1/2 flex-col space-y-1 justify-end items-end p-2'>
           <p>{namePool}</p>
           {isLoading ? (<Spinner />) : (<p className='text-sm w-full text-right' >{totalAmount.toFixed(4)}{' ' + symbol}</p>)}
-          <p className='text-sm text-right w-full'>${usdPrice.toFixed(2)}</p>
+          <p className='text-sm text-right w-full'>${isNaN(parseFloat(usdPrice.toFixed(2))) ? 0 : usdPrice.toFixed(2)}</p>
         </div>
       </div>
       <div className='flex flex-row w-full border-t-2 pt-2'>
@@ -47,7 +47,7 @@ export const TvlCard = ({ namePool, totalAmount, isLoading, usdPrice, totalInves
         </div>
       </div>
       <div className='flex w-full items-end'>
-        <p className='w-full text-xs text-right'>${amountUsd ? parseFloat(amountUsd).toFixed(2) : '0'}</p>
+        <p className='w-full text-xs text-right'>${isNaN(parseFloat(amountUsd)) ? parseFloat(amountUsd).toFixed(2) : '0'}</p>
       </div>
     </div>
   );

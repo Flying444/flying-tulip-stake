@@ -5,6 +5,7 @@ import {
     useState,
 } from "react";
 import axios from "axios";
+import { useInterval } from "@/hooks/useInterval";
 
 type TContextPrices = {
     ethPrice: number;
@@ -12,15 +13,19 @@ type TContextPrices = {
     sPrice: number;
 };
 
-/* type Ttimer = {
-    hours: number;
-    minutes: number;
-    seconds: number;
-} */
+
+type TData = {
+    totalEth: number;
+    totalBnb: number;
+    totalS: number;
+    totalStakersEth: number;
+    totalStakersBnb: number;
+    totalStakersS: number;
+}
 
 type TGlobal = {
     prices: TContextPrices;
-    //currentTime: Ttimer;
+    currentTotals: TData;
 }
 
 const initVal = {
@@ -29,42 +34,51 @@ const initVal = {
     sPrice: 0,
 }
 
-//const initialTime = 3 * 60 * 60;
-//const LOCAL_STORAGE_KEY = 'threeHourCounterTimeLeft';
+const initTotals = {
+    totalEth: 0, totalBnb: 0, totalS: 0, totalStakersEth: 0, totalStakersBnb: 0, totalStakersS: 0
+}
+
 
 export const ContextPrices = createContext<TGlobal>({
-    prices: initVal
-    /* currentTime: {
-        hours: initialTime,
-        minutes: 0
-        seconds: 0
-    }, */
+    prices: initVal,
+    currentTotals: initTotals
 });
+
+const apiPools = import.meta.env.VITE_API_POOLS
 
 export function ContextPricesProvider({ children }: { children: ReactNode }) {
     const [prices, setPrices] = useState<TContextPrices>(initVal);
-   // const [timeLeft, setTimeLeft] = useState<number>(initialTime);
+    const [currentTotals, setCurrentTotals] = useState<TData>(initTotals)
 
-   /*  const formatTime = (seconds: number): Ttimer => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = seconds % 60;
-        return { hours, minutes, seconds: remainingSeconds };
-    }; */
-
-/*     const savedTime = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedTime !== null) {
-        const parsedTime = parseInt(savedTime, 10);
-        if (!isNaN(parsedTime) && parsedTime > 0) {
-            return parsedTime;
+    const getTotals = async () => {
+        try {
+            const res = await axios.get(apiPools)
+            const data = res.data
+            if (data) {
+                setCurrentTotals({
+                    totalEth: data['totalEth'],
+                    totalBnb: data['totalBnb'],
+                    totalS: data['totalS'],
+                    totalStakersEth: data['totalStakersEth'],
+                    totalStakersBnb: data['totalStakersBnb'],
+                    totalStakersS: data['totalStakersS']
+                })
+            }
+        } catch (error) {
+            console.log(error)
         }
-    } */
+    }
+
+       useInterval(() => {
+           getTotals()
+        }, 2000);
 
 
     const getUsdPrices = async () => {
         try {
             const res = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,binancecoin,sonic-3&vs_currencies=usd');
             const data = res.data
+            console.log('fetching')
             setPrices({
                 ethPrice: data['ethereum'].usd,
                 bnbPrice: data['binancecoin'].usd,
@@ -77,19 +91,15 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    
-  useEffect(() => {
+
+    useEffect(() => {
         getUsdPrices()
+        getTotals()
     }, [])
 
-
-    //const currentTime = formatTime(timeLeft);
-
     return (
-        <ContextPrices.Provider value={{ prices }} >
+        <ContextPrices.Provider value={{ prices, currentTotals }} >
             {children}
         </ContextPrices.Provider>
     )
-
-
 }
