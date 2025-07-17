@@ -54,7 +54,6 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
         try {
             const res = await axios.get(apiPools)
             const data = res.data.data;
-            console.log(data['totalEth'])
             if (data) {
                 setCurrentTotals({
                     totalEth: data['totalEth'],

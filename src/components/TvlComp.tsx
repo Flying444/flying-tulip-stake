@@ -40,7 +40,6 @@ export const TvlComp = () => {
     }, FIVE_SECS);
 
     useEffect(() => {
-        console.log(currentTotals)
         const ether = calcToUsd(totalEth.total + currentTotals.totalEth, ethPrice)
         const bnb = calcToUsd(totalBnb.total + currentTotals.totalBnb, bnbPrice)
         const solo = calcToUsd(totalSolo.total + 0, ethPrice)
@@ -57,8 +56,6 @@ export const TvlComp = () => {
             { namePool: "BSC", totalAmount: totalBnb.total + currentTotals.totalBnb, usdPrice: bnb, totalInvested: bnbInv },
             { namePool: "Sonic", totalAmount: totalS.total + currentTotals.totalS, usdPrice: totalson, totalInvested: sInv }
         ])
-
-        console.log(currentTotals.totalEth, currentTotals.totalS, 'prices')
     }, [currentTotals])
 
     return (

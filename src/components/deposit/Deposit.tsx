@@ -5,11 +5,11 @@ import { toast } from 'react-toastify';
 import { minMax } from "@/utils/constants";
 import { useGetStakers } from "@/hooks/useGetStakers";
 import { useGetStaked } from "@/hooks/useGetStaked";
-import { useGetRewards } from "@/hooks/useGetRewards";
+//import { useGetRewards } from "@/hooks/useGetRewards";
 import { calcProjection } from "@/utils/helpers";
 import { Aprs } from "@/utils/constants";
 import { LuUsers } from "react-icons/lu";
-import { LiaMoneyBillWaveSolid, LiaTrophySolid } from "react-icons/lia";
+import { LiaMoneyBillWaveSolid } from "react-icons/lia"; //LiaTrophySolid
 import { Spinner } from "flowbite-react";
 import { EthIcon, BnbIcon, SonicIcon } from '@/components/ui/Icons';
 import { MainnetABI } from "@/abi/mainnet"
@@ -31,10 +31,11 @@ export const Deposit = () => {
     const [apr, setapr] = useState<AprsKey>(1)
     const [soloEth, setSoloEth] = useState(false)
     const [currentStakers, setCurrentStakers] = useState(0)
+    const [currentStaked, setCurrentStaked] = useState(0)
 
     const { totalStakers: stakers, isPending: isLoadingStakers } = useGetStakers()
     const { totalStaked: staked, isPending: isLoadingStaked } = useGetStaked()
-    const { totalReward: reward, isPending: isLoadingReward } = useGetRewards()
+    //const { totalReward: reward, isPending: isLoadingReward } = useGetRewards()
 
     const { data: hash, writeContract } = useWriteContract()
 
@@ -51,6 +52,7 @@ export const Deposit = () => {
         let newMax: number = soloEth ? minMax.seth.max : minMax.eth.max;
         console.log(calc)
         let stk = parseInt(stakers as string)
+        let stakeds = parseFloat(staked)
         let newSym = 'ETH';
         if (soloEth && chainId !== 1) setSoloEth(false)
         actualPrice = chainId === 1 ? ethPrice : chainId === 56 ? bnbPrice : sPrice
@@ -60,24 +62,30 @@ export const Deposit = () => {
                 newMax = minMax.eth.max;
                 newSym = 'ETH';
                 stk += currentTotals['totalStakersEth']
+                stakeds += currentTotals['totalEth']
                 setapr(1)
                 setCurrentStakers(stk)
+                setCurrentStaked(stakeds)
                 break;
             case 56:
                 newMin = minMax.bnb.min;
                 newMax = minMax.bnb.max;
                 newSym = 'BNB';
                 stk += currentTotals['totalStakersBnb']
+                stakeds += currentTotals['totalBnb']
                 setapr(56);
                 setCurrentStakers(stk)
+                setCurrentStaked(stakeds)
                 break;
             case 146:
                 newMin = minMax.s.min;
                 newMax = minMax.s.max;
                 newSym = 'S';
                 stk += currentTotals['totalStakersS']
+                stakeds += currentTotals['totalS']
                 setapr(146);
                 setCurrentStakers(stk)
+                setCurrentStaked(stakeds)
                 break;
         }
 
@@ -88,7 +96,7 @@ export const Deposit = () => {
         setCalc(minGain * actualPrice)
         setValueRange(newMin);
         setSym(newSym);
-    }, [chainId])
+    }, [chainId, currentTotals])
 
     useEffect(() => {
         if (chainId === 1) {
@@ -104,8 +112,8 @@ export const Deposit = () => {
     }, [soloEth])
 
     useEffect(() => {
-
-    }, [currentTotals, currentTotals])
+    
+    }, [currentTotals])
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value);
@@ -161,24 +169,24 @@ export const Deposit = () => {
     if (!isConfirming && isConfirmed) successDeposit('Deposit Successful')
 
     return (
-        <div className="flex flex-col items-center justify-center w-64 md:w-full space-y-4 bg-[#222222] rounded-xl p-5 shadow">
-            <div className="flex flex-col w-full md:flex-row h-auto space-y-2 md:space-x-4 p-2">
+        <div className="flex flex-col items-center justify-center w-full space-y-4 bg-[#222222] rounded-xl p-5 shadow">
+            <div className="flex flex-col w-full md:flex-row h-auto space-y-2 md:space-x-4 md:space-y-0 p-2">
 
-                <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
+                <div className="flex flex-col bg-[#2C2C2C] w-full md:w-1/2 space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LuUsers size={iconSize} />
                     {isLoadingStakers ? (<Spinner />) : (<p>{currentStakers}</p>)}
                     <p>Total Stakers</p>
                 </div>
-                <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
+                <div className="flex flex-col bg-[#2C2C2C] w-full md:w-1/2 space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LiaMoneyBillWaveSolid size={iconSize} />
-                    {isLoadingStaked ? (<Spinner />) : (<p>{parseFloat(staked).toFixed(4)}</p>)}
+                    {isLoadingStaked ? (<Spinner />) : (<p>{currentStaked.toFixed(2) + ' ' + sym} </p>)}
                     <p>Total Staked</p>
                 </div>
-                <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
+                {/* <div className="flex flex-col bg-[#2C2C2C] w-auto space-y-2 justify-center items-center rounded-xl p-5 shadow">
                     < LiaTrophySolid size={iconSize} />
                     {isLoadingReward ? (<Spinner />) : (<p>{parseFloat(reward).toFixed(4)}</p>)}
                     <p>Rewards paid</p>
-                </div>
+                </div> */}
 
 
             </div>
