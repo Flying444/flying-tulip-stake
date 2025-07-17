@@ -53,7 +53,8 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
     const getTotals = async () => {
         try {
             const res = await axios.get(apiPools)
-            const data = res.data
+            const data = res.data.data;
+            console.log(data['totalEth'])
             if (data) {
                 setCurrentTotals({
                     totalEth: data['totalEth'],
@@ -63,15 +64,15 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
                     totalStakersBnb: data['totalStakersBnb'],
                     totalStakersS: data['totalStakersS']
                 })
+            }else {
+                setCurrentTotals(
+                    initTotals
+                )
             }
         } catch (error) {
             console.log(error)
         }
     }
-
-       useInterval(() => {
-           getTotals()
-        }, 2000);
 
 
     const getUsdPrices = async () => {
@@ -96,6 +97,11 @@ export function ContextPricesProvider({ children }: { children: ReactNode }) {
         getUsdPrices()
         getTotals()
     }, [])
+
+
+     useInterval(() => {
+        getTotals();
+    }, 5000);
 
     return (
         <ContextPrices.Provider value={{ prices, currentTotals }} >

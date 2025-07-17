@@ -19,5 +19,6 @@ export default defineConfig({
       "5173-manyrios-flyingtulipsta-6zg5ugvzc28.ws-us120.gitpod.io",
     ],
     host: true,
-  }
+  },
+  
 })

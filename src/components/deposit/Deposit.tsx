@@ -103,11 +103,13 @@ export const Deposit = () => {
         }
     }, [soloEth])
 
+    useEffect(() => {
+
+    }, [currentTotals, currentTotals])
+
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value);
         setValueRange(value)
-        console.log(value)
-        console.log(valueRange)
         const { minGain } = calcProjection(value, soloEth ? SETH.min : Aprs[apr].min, soloEth ? SETH.min : Aprs[apr].max)
         const proj = minGain
         setProjection(proj)

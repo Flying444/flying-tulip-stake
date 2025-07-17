@@ -11,7 +11,7 @@ import { ContextPrices } from '@/context/ContextProvider'
 import { calcToUsd } from "@/utils/helpers";
 
 export const TvlComp = () => {
-    const {address} = useAccount();
+    const { address } = useAccount();
     const { prices, currentTotals } = useContext(ContextPrices)
 
     const { ethPrice, bnbPrice, sPrice } = prices
@@ -28,9 +28,9 @@ export const TvlComp = () => {
     const totalS = useTvl(sonic.id)
     const totalSolo = useGetSoloPool();
 
-    const totalInvEth = useGetUserData( mainnet.id, address ? address : '0x');
-    const totalInvbnb = useGetUserData( bsc.id, address ? address : '0x');
-    const totalInvs = useGetUserData( sonic.id, address ? address : '0x');
+    const totalInvEth = useGetUserData(mainnet.id, address ? address : '0x');
+    const totalInvbnb = useGetUserData(bsc.id, address ? address : '0x');
+    const totalInvs = useGetUserData(sonic.id, address ? address : '0x');
 
     useInterval(() => {
         totalEth.refetch()
@@ -40,29 +40,26 @@ export const TvlComp = () => {
     }, FIVE_SECS);
 
     useEffect(() => {
-
+        console.log(currentTotals)
         const ether = calcToUsd(totalEth.total + currentTotals.totalEth, ethPrice)
         const bnb = calcToUsd(totalBnb.total + currentTotals.totalBnb, bnbPrice)
         const solo = calcToUsd(totalSolo.total + 0, ethPrice)
         const totalson = calcToUsd(totalS.total + currentTotals.totalS, sPrice)
-        
-        const ethInv =  parseFloat(totalInvEth.totals[0] as string)
+
+        const ethInv = parseFloat(totalInvEth.totals[0] as string)
         const soloEthInv = parseFloat(totalInvEth.totals[1] as string)
         const bnbInv = parseFloat(totalInvbnb.totals[0] as string)
         const sInv = parseFloat(totalInvs.totals[0] as string)
 
         setTvl([
-            { namePool: "Mainnet", totalAmount: totalEth.total, usdPrice: ether, totalInvested: ethInv + currentTotals.totalEth},
-            { namePool: "Solo Staking", totalAmount: totalSolo.total, usdPrice: solo, totalInvested: soloEthInv + 0 },
-            { namePool: "BSC", totalAmount: totalBnb.total, usdPrice: bnb, totalInvested: bnbInv + currentTotals.totalBnb},
-            { namePool: "Sonic", totalAmount: totalS.total, usdPrice: totalson, totalInvested: sInv + currentTotals.totalS}
+            { namePool: "Mainnet", totalAmount: totalEth.total + currentTotals.totalEth, usdPrice: ether, totalInvested: ethInv },
+            { namePool: "Solo Staking", totalAmount: totalSolo.total + 0, usdPrice: solo, totalInvested: soloEthInv },
+            { namePool: "BSC", totalAmount: totalBnb.total + currentTotals.totalBnb, usdPrice: bnb, totalInvested: bnbInv },
+            { namePool: "Sonic", totalAmount: totalS.total + currentTotals.totalS, usdPrice: totalson, totalInvested: sInv }
         ])
 
-
-    }, [ethPrice, bnbPrice, sPrice])
-
-
-
+        console.log(currentTotals.totalEth, currentTotals.totalS, 'prices')
+    }, [currentTotals])
 
     return (
         <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row w-full justify-center items-center  md:space-x-6 p-2 md:p-4">
